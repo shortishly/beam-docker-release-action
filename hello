@@ -15,25 +15,20 @@
 %% limitations under the License.
 %%
 
+-module(hello).
+-mode(compile).
+
+
 main([]) ->
     debug(os:env()),
     set_output("script_name", escript:script_name()),
     set_output(
       "time",
       calendar:system_time_to_rfc3339(erlang:system_time(second))),
-    io:format("Hello ~s~n", [WhoToGreet]).
+    io:format("Hello ~s~n", ["Abc"]).
 
 set_output(Name, Value) ->
     io:format("::set-output name=~s::~s~n", [Name, Value]).
-
-get_input(Name) ->
-    case os:getenv("INPUT_" ++ string:uppercase(Name)) of
-        false ->
-            error(badarg, [Name]);
-
-        Value ->
-            Value
-    end.
 
 debug(Message) ->
     io:format("::debug::~p~n", [Message]).
