@@ -15,8 +15,8 @@
 %% limitations under the License.
 %%
 
-main([WhoToGreet] = Args) ->
-    debug(Args),
+main([]) ->
+    debug(os:env()),
     set_output("script_name", escript:script_name()),
     set_output(
       "time",
@@ -25,6 +25,15 @@ main([WhoToGreet] = Args) ->
 
 set_output(Name, Value) ->
     io:format("::set-output name=~s::~s~n", [Name, Value]).
+
+get_input(Name) ->
+    case os:getenv("INPUT_" ++ string:uppercase(Name)) of
+        false ->
+            error(badarg, [Name]);
+
+        Value ->
+            Value
+    end.
 
 debug(Message) ->
     io:format("::debug::~p~n", [Message]).
