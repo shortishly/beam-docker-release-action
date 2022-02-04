@@ -30,7 +30,7 @@ application() ->
 
 app() ->
     [Filename] = filelib:wildcard(
-                   filename:join(runner_workspace(),"ebin/*.app")),
+                   filename:join(github_workspace(),"ebin/*.app")),
     debug(Filename),
     Filename.
 
@@ -39,8 +39,8 @@ set_output(Name, Value) ->
     io:format("::set-output name=~s::~s~n", [Name, Value]).
 
 
-runner_workspace() ->
-    getenv("RUNNER_WORKSPACE").
+github_workspace() ->
+    getenv("GITHUB_WORKSPACE").
 
 
 debug(Message) ->
