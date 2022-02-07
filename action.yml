@@ -22,7 +22,7 @@ runs:
     - name: Substitute Dockerfile M4 variables
       run: >
         m4
-        -DETS_VSN=${{ steps.system.outputs.version }}
+        -DERTS_VSN=${{ steps.system.outputs.version }}
         -DREL_NAME=${{ steps.release.outputs.name }}
         -DREL_VSN=${{ steps.release.outputs.version }}
         $GITHUB_ACTION_PATH/Dockerfile.m4 >Dockerfile
