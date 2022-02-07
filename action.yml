@@ -4,12 +4,6 @@ description: 'Greet someone and record the time'
 runs:
   using: "composite"
   steps:
-    - name: Log in to the Container registry
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     - name: ERTS System Infomation
       run: $GITHUB_ACTION_PATH/bin/system
       id: system
@@ -26,18 +20,20 @@ runs:
       run: $GITHUB_ACTION_PATH/bin/mkimage ${{ steps.release.outputs.name }}
       shell: bash
     - name: Substitute Dockerfile M4 variables
-    - run: m4
+    - run: >
+        m4
        -DETS_VSN=${{ steps.system.outputs.version }}
        -DREL_NAME=${{ steps.release.outputs.name }}
        -DREL_VSN=${{ steps.release.outputs.version }}
        $GITHUB_ACTION_PATH/Dockerfile.m4 >Dockerfile
       shell: bash
     - name: Docker Build
-      run: docker build
-       --pull=true
-       --no-cache=true
-       --force-rm=true
-       -t ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }} .
+      run: >
+        docker build
+        --pull=true
+        --no-cache=true
+        --force-rm=true
+        -t ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }} .
       shell: bash
     - name: Docker Push
       run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
