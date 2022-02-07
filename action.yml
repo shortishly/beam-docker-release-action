@@ -20,7 +20,7 @@ runs:
       run: $GITHUB_ACTION_PATH/bin/mkimage ${{ steps.release.outputs.name }}
       shell: bash
     - name: Substitute Dockerfile M4 variables
-    - run: >
+      run: >
         m4
        -DETS_VSN=${{ steps.system.outputs.version }}
        -DREL_NAME=${{ steps.release.outputs.name }}
@@ -33,8 +33,13 @@ runs:
         --pull=true
         --no-cache=true
         --force-rm=true
-        -t ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }} .
+        -t
+        ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+        .
       shell: bash
     - name: Docker Push
-      run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+      run: >
+        docker
+        push
+        ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
       shell: bash
