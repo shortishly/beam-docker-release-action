@@ -50,17 +50,12 @@ runs:
         --no-cache=true
         --force-rm=true
         -t
-        ${{ inputs.registry }}/
-         ${{ inputs.username }}/
-         ${{ steps.release.outputs.name }}:
-         ${{ steps.app.outputs.version }}
+        ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
         .
       shell: bash
     - name: Docker Push
       run: >
         docker
         push
-        ${{ inputs.registry }}/
-         ${{ inputs.username }}/
-         ${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+        ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
       shell: bash
