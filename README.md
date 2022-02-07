@@ -30,10 +30,12 @@ The name of the image.
 
 ## Example usage
 
+```yaml
 uses: shortishly/beam-docker-release-action@v1.15
 with:
   registry: ${{ env.REGISTRY }}
   username: ${{ github.actor }}
   password: ${{ secrets.GITHUB_TOKEN }}
+```
 
 For a full example: https://github.com/shortishly/hello_world
