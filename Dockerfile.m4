@@ -1,4 +1,4 @@
-%% -*- mode: dockerfile -*-
+# -*- mode: dockerfile -*-
 # Copyright (c) 2012-2022 Peter Morgan <peter.james.morgan@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
