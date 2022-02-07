@@ -21,7 +21,7 @@
 
 
 main([]) ->
-    [{release, {Name, Version}, _}] = release(),
+    {release, {Name, Version}, _} = release(),
     set_output("name", Name),
     set_output("version", Version).
 
