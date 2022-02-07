@@ -16,6 +16,6 @@
 FROM scratch
 MAINTAINER Peter Morgan <peter.james.morgan@gmail.com>
 
-ENTRYPOINT ["/erts-ERTS_VSN/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/releases/REL_VSN/REL_NAME", "-noinput", "-no_epmd", "-config", "/releases/REL_VSN/sys.config", "-args_file", "/releases/REL_VSN/vm.args"]
+ENTRYPOINT ["/erts-ERTS_VSN/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/releases/REL_VSN/REL_NAME", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/releases/REL_VSN/sys.config", "-args_file", "/releases/REL_VSN/vm.args"]
 
 ADD _rel/REL_NAME/ /
