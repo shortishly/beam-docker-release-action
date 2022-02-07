@@ -1,9 +1,25 @@
-# action.yml
-name: 'Hello World'
-description: 'Greet someone and record the time'
+---
+name: BEAM Docker Release
+description: Publish BEAM release as a Docker image
+inputs:
+  registry:
+    description: Container Registry
+    required: true
+  username:
+    description: Registry Username
+    required: true
+  password:
+    description: Registry Password
+    required: true
 runs:
-  using: "composite"
+  using: composite
   steps:
+    - name: Log in to the Container registry
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
     - name: ERTS System Infomation
       run: $GITHUB_ACTION_PATH/bin/system
       id: system
@@ -34,12 +50,17 @@ runs:
         --no-cache=true
         --force-rm=true
         -t
-        ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+        ${{ inputs.registry }}/
+         ${{ inputs.username }}/
+         ${{ steps.release.outputs.name }}:
+         ${{ steps.app.outputs.version }}
         .
       shell: bash
     - name: Docker Push
       run: >
         docker
         push
-        ${{ env.REGISTRY }}/${{ github.actor }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+        ${{ inputs.registry }}/
+         ${{ inputs.username }}/
+         ${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
       shell: bash
