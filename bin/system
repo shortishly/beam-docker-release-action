@@ -21,7 +21,17 @@
 
 
 main([]) ->
-    set_output("version", erlang:system_info(version)).
+    set_output("version", erlang:system_info(version)),
+    set_output("otp",
+               begin
+                   {ok, Version} = file:read_file(
+                                     filename:join(
+                                       [code:root_dir(),
+                                        "releases",
+                                        erlang:system_info(otp_release),
+                                        "OTP_VERSION"])),
+                   string:trim(Version)
+               end).
 
 
 set_output(Name, Value) ->

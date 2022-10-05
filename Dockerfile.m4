@@ -13,12 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM scratch
 MAINTAINER Peter Morgan <peter.james.morgan@gmail.com>
+
+ARG OTP_VERSION=latest
+FROM erlang:${OTP_VERSION} AS build
+RUN make
+RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
+
+
+FROM scratch
 
 ENV BINDIR /erts-ERTS_VSN/bin
 ENV TZ=GMT
 
 ENTRYPOINT ["/erts-ERTS_VSN/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/releases/REL_VSN/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/releases/REL_VSN/sys.config", "-args_file", "/releases/REL_VSN/vm.args"]
 
-ADD _rel/REL_NAME/ /
+ADD --from=build _rel/REL_NAME/ /
