@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-MAINTAINER Peter Morgan <peter.james.morgan@gmail.com>
-
 ARG OTP_VERSION=latest
 FROM erlang:${OTP_VERSION} AS build
+MAINTAINER Peter Morgan <peter.james.morgan@gmail.com>
 RUN make
 RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
 
