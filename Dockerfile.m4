@@ -15,7 +15,11 @@
 #
 ARG OTP_VERSION=latest
 FROM erlang:${OTP_VERSION} AS build
-MAINTAINER Peter Morgan <peter.james.morgan@gmail.com>
+
+LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
+LABEL org.opencontainers.image.description="BEAM docker release from scratch"
+
+RUN ls
 RUN make
 RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
 
