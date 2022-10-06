@@ -34,10 +34,6 @@ runs:
       run: $GITHUB_ACTION_PATH/bin/release
       id: release
       shell: bash
-    - name: Application Information
-      run: $GITHUB_ACTION_PATH/bin/app
-      id: app
-      shell: bash
     - name: Substitute Dockerfile M4 variables
       run: >
         m4
@@ -54,4 +50,4 @@ runs:
         build-args: |
           OTP_VERSION=${{ steps.system.outputs.otp }}
         push: true
-        tags: ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}:${{ steps.app.outputs.version }}
+        tags: ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}
