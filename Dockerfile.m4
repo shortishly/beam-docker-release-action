@@ -19,6 +19,9 @@ FROM erlang:${OTP_VERSION} AS build
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 
+RUN mkdir /build
+WORKDIR /build
+ADD / /build/
 RUN ls
 RUN make
 RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
