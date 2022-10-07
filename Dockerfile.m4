@@ -22,7 +22,7 @@ LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 RUN mkdir /build
 WORKDIR /build
 ADD / /build/
-RUN ls
+RUN ls -R /build
 RUN make
 RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
 
