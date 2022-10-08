@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 ARG OTP_VERSION
-FROM erlang:${OTP_VERSION} AS build
+FROM --platform=$BUILDPLATFORM erlang:${OTP_VERSION} AS build
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
