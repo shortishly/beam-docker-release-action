@@ -28,9 +28,9 @@ done
 # ensure that the link loader is present
 case `arch` in
     x86_64)
-        mkdir -p ${RELEASE}/lib64
-        cp -v /lib64/ld-linux*.so.* ${RELEASE}/lib64;;
+        mkdir -p _rel/$1/lib64
+        cp -v /lib64/ld-linux*.so.* _rel/$1/lib64;;
 
     aarch64)
-        cp -v /lib/ld-linux*.so.* ${RELEASE}/lib;;
+        cp -v /lib/ld-linux*.so.* _rel/$1/lib;;
 esac
