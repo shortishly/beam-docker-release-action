@@ -15,7 +15,6 @@
 #
 ARG OTP_VERSION
 FROM erlang:${OTP_VERSION} AS build
-
 ARG GITHUB_REPOSITORY
 
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
@@ -30,6 +29,7 @@ RUN beam-docker-release-action/mkimage REL_NAME
 
 
 FROM scratch
+ARG GITHUB_REPOSITORY
 
 ENV BINDIR /erts-ERTS_VSN/bin
 ENV TZ=GMT
