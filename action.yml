@@ -32,6 +32,8 @@ runs:
       run: $GITHUB_ACTION_PATH/bin/release
       id: release
       shell: bash
+    - name: Copy BEAM Release Action Scripts
+      run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
     - name: Substitute Dockerfile M4 variables
       run: >
         m4
@@ -45,7 +47,8 @@ runs:
       with:
         context: .
         platforms: linux/amd64
-        build-args: |
-          OTP_VERSION=${{ steps.system.outputs.otp }}
+        build-args:
+          - OTP_VERSION=${{ steps.system.outputs.otp }}
+          - GITHUB_REPOSITORY=${{ github.repository }}
         push: true
         tags: ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}
