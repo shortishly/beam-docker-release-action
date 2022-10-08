@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 ARG OTP_VERSION
-FROM --platform=$BUILDPLATFORM erlang:${OTP_VERSION} AS build
+FROM erlang:${OTP_VERSION}
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
@@ -27,14 +27,3 @@ ADD / /${GITHUB_REPOSITORY}/
 RUN ${BUILD_COMMAND}
 RUN beam-docker-release-action/mkimage REL_NAME
 RUN beam-docker-release-action/app
-
-
-FROM scratch
-ARG GITHUB_REPOSITORY
-
-ENV BINDIR /erts-ERTS_VSN/bin
-ENV TZ=GMT
-
-ENTRYPOINT ["/erts-ERTS_VSN/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/releases/REL_VSN/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/releases/REL_VSN/sys.config", "-args_file", "/releases/REL_VSN/vm.args"]
-
-COPY --from=build /${GITHUB_REPOSITORY}/_rel/REL_NAME/ /
