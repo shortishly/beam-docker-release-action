@@ -22,8 +22,8 @@
 
 main([]) ->
     {application, Name, Properties} = application(),
-    set_output("name", Name),
-    set_output("version", proplists:get_value(vsn, Properties)).
+    set_output("app-name", Name),
+    set_output("app-version", proplists:get_value(vsn, Properties)).
 
 
 application() ->
@@ -31,8 +31,7 @@ application() ->
     Application.
 
 app() ->
-    [Filename] = filelib:wildcard(
-                   filename:join(github_workspace(),"ebin/*.app")),
+    [Filename] = filelib:wildcard("ebin/*.app"),
     debug(Filename),
     Filename.
 
@@ -41,19 +40,5 @@ set_output(Name, Value) ->
     io:format("::set-output name=~s::~s~n", [Name, Value]).
 
 
-github_workspace() ->
-    getenv("GITHUB_WORKSPACE").
-
-
 debug(Message) ->
     io:format("::debug::~p~n", [Message]).
-
-
-getenv(Variable) ->
-    case os:getenv(Variable) of
-        false ->
-            error(badarg, [Variable]);
-
-        Value ->
-            Value
-    end.
