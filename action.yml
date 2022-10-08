@@ -25,6 +25,8 @@ runs:
         password: ${{ inputs.password }}
     - name: checkout
       uses: actions/checkout@v3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
     - name: set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     - name: ERTS System Infomation
