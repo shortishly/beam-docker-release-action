@@ -47,8 +47,9 @@ runs:
       with:
         context: .
         platforms: linux/amd64
-        build-args:
-          - OTP_VERSION=${{ steps.system.outputs.otp }}
-          - GITHUB_REPOSITORY=${{ github.repository }}
+        build-args: |
+          OTP_VERSION=${{ steps.system.outputs.otp }}
+        build-args: |
+          GITHUB_REPOSITORY=${{ github.repository }}
         push: true
         tags: ${{ inputs.registry }}/${{ inputs.username }}/${{ steps.release.outputs.name }}
