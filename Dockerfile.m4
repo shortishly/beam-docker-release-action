@@ -13,18 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ARG OTP_VERSION=latest
+ARG OTP_VERSION
+ARG GITHUB_REPOSITORY
 FROM erlang:${OTP_VERSION} AS build
 
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 
-RUN mkdir /build
-WORKDIR /build
-ADD / /build/
-RUN ls -R /build
+RUN mkdir -p /${GITHUB_REPOSITORY}
+WORKDIR /${GITHUB_REPOSITORY}
+ADD / /${GITHUB_REPOSITORY}/
+RUN ls /${GITHUB_REPOSITORY}
 RUN make
-RUN ${GITHUB_ACTION_PATH}/mkimage REL_NAME
+RUN beam-docker-release-action/mkimage REL_NAME
 
 
 FROM scratch
