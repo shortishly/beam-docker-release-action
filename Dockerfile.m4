@@ -16,6 +16,7 @@
 ARG OTP_VERSION
 FROM erlang:${OTP_VERSION} AS build
 ARG GITHUB_REPOSITORY
+ARG BUILD_COMMAND
 
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
@@ -23,9 +24,9 @@ LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}
 ADD / /${GITHUB_REPOSITORY}/
-RUN ls /${GITHUB_REPOSITORY}
-RUN make
+RUN ${BUILD_COMMAND}
 RUN beam-docker-release-action/mkimage REL_NAME
+RUN beam-docker-release-action/app
 
 
 FROM scratch
