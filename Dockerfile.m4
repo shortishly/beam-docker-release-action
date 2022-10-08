@@ -14,8 +14,9 @@
 # limitations under the License.
 #
 ARG OTP_VERSION
-ARG GITHUB_REPOSITORY
 FROM erlang:${OTP_VERSION} AS build
+
+ARG GITHUB_REPOSITORY
 
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
