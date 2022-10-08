@@ -34,6 +34,7 @@ runs:
       shell: bash
     - name: Copy BEAM Release Action Scripts
       run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
+      shell: bash
     - name: Substitute Dockerfile M4 variables
       run: >
         m4
