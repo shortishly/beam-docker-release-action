@@ -52,3 +52,4 @@ runs:
           GITHUB_REPOSITORY=${{ github.repository }}
           BUILD_COMMAND=${{ inputs.build-command }}
         push: true
+        tags: ${{ inputs.registry }}/${{ github.repository }}
