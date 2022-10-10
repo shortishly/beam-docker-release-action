@@ -21,6 +21,7 @@ ARG BUILD_COMMAND
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 
+RUN apt-get install -y valgrind
 RUN uname -a
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}

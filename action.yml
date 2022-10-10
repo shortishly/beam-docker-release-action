@@ -13,7 +13,7 @@ inputs:
     required: true
   build-command:
     description: Build command
-    default: make
+    default: valgrind make
 runs:
   using: composite
   steps:
