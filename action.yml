@@ -13,7 +13,7 @@ inputs:
     required: true
   build-command:
     description: Build command
-    default: valgrind make
+    default: make
 runs:
   using: composite
   steps:
@@ -54,7 +54,7 @@ runs:
         context: .
         platforms: linux/arm64
         build-args: |
-          OTP_VERSION=${{ steps.system.outputs.otp }}
+          OTP_VERSION=25.1.1.0
           GITHUB_REPOSITORY=${{ github.repository }}
           BUILD_COMMAND=${{ inputs.build-command }}
         push: true

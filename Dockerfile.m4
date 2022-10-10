@@ -21,13 +21,11 @@ ARG BUILD_COMMAND
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 
-RUN apt-get update
-RUN apt-get install -y valgrind
 RUN uname -a
+RUN file $(which make)
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}
 ADD / /${GITHUB_REPOSITORY}/
-ENV V=1
 RUN ${BUILD_COMMAND}
 RUN beam-docker-release-action/mkimage REL_NAME
 RUN beam-docker-release-action/app
