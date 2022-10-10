@@ -25,6 +25,7 @@ RUN uname -a
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}
 ADD / /${GITHUB_REPOSITORY}/
+ENV V=1
 RUN ${BUILD_COMMAND}
 RUN beam-docker-release-action/mkimage REL_NAME
 RUN beam-docker-release-action/app
