@@ -33,10 +33,6 @@ runs:
       run: $GITHUB_ACTION_PATH/bin/system
       id: system
       shell: bash
-    - name: Release Information
-      run: $GITHUB_ACTION_PATH/bin/release
-      id: release
-      shell: bash
     - name: Copy BEAM Release Action Scripts
       run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
       shell: bash
@@ -44,8 +40,6 @@ runs:
       run: >
         m4
         -DERTS_VSN=${{ steps.system.outputs.version }}
-        -DREL_NAME=${{ steps.release.outputs.name }}
-        -DREL_VSN=${{ steps.release.outputs.version }}
         $GITHUB_ACTION_PATH/Dockerfile.m4 >Dockerfile
       shell: bash
     - name: Build and push
