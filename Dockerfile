@@ -31,9 +31,9 @@ RUN beam-docker-release-action/mkimage
 FROM scratch
 ARG GITHUB_REPOSITORY
 
-ENV BINDIR /erts/bin
+ENV BINDIR /erts-13.1.1/bin
 ENV TZ=GMT
 
-ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
+ENTRYPOINT ["/erts-13.1.1/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/releases/1/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/releases/1/sys.config", "-args_file", "/releases/1/vm.args"]
 
 COPY --from=build /${GITHUB_REPOSITORY}/_image/ /
