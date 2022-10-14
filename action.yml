@@ -11,9 +11,15 @@ inputs:
   password:
     description: Registry Password
     required: true
+  build-otp-version:
+    description: Build OTP Version
+    default: 25.1.1.0
   build-command:
     description: Build command
-    default: make -d
+    default: make
+  build-platforms:
+    description: Build platforms
+    default: linux/amd64
 runs:
   using: composite
   steps:
@@ -29,26 +35,16 @@ runs:
       uses: docker/setup-qemu-action@v2
     - name: set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    - name: ERTS System Infomation
-      run: $GITHUB_ACTION_PATH/bin/system
-      id: system
-      shell: bash
     - name: Copy BEAM Release Action Scripts
       run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
-      shell: bash
-    - name: Substitute Dockerfile M4 variables
-      run: >
-        m4
-        -DERTS_VSN=${{ steps.system.outputs.version }}
-        $GITHUB_ACTION_PATH/Dockerfile.m4 >Dockerfile
       shell: bash
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
         context: .
-        platforms: linux/arm64
+        platforms: ${{inputs.build-platforms}}
         build-args: |
-          OTP_VERSION=25.1.1.0
+          OTP_VERSION=${{inputs.build-otp-version}}
           GITHUB_REPOSITORY=${{ github.repository }}
           BUILD_COMMAND=${{ inputs.build-command }}
         push: true

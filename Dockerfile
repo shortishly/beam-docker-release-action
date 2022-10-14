@@ -14,18 +14,26 @@
 # limitations under the License.
 #
 ARG OTP_VERSION
-FROM erlang:${OTP_VERSION}
+FROM erlang:${OTP_VERSION} as build
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
 LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
 LABEL org.opencontainers.image.description="BEAM docker release from scratch"
 
-RUN uname -a
-RUN file $(which make)
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}
 ADD / /${GITHUB_REPOSITORY}/
 RUN ${BUILD_COMMAND}
-RUN beam-docker-release-action/mkimage REL_NAME
-RUN beam-docker-release-action/app
+RUN beam-docker-release-action/mkimage
+
+
+FROM scratch
+ARG GITHUB_REPOSITORY
+
+ENV BINDIR /erts/bin
+ENV TZ=GMT
+
+ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
+
+COPY --from=build /${GITHUB_REPOSITORY}/_image/ /

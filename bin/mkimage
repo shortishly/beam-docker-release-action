@@ -1,36 +1,135 @@
-#!/usr/bin/env bash
-# Copyright (c) 2012-2022 Peter Morgan <peter.james.morgan@gmail.com>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+#!/usr/bin/env escript
+%% -*- erlang -*-
+%% Copyright (c) 2012-2022 Peter Morgan <peter.james.morgan@gmail.com>
+%%
+%% Licensed under the Apache License, Version 2.0 (the "License");
+%% you may not use this file except in compliance with the License.
+%% You may obtain a copy of the License at
+%%
+%% http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS,
+%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%% See the License for the specific language governing permissions and
+%% limitations under the License.
+%%
 
-# strip symbol information out of any ERTS binaries
-for fat in $(file _rel/*/erts-*/bin/*|grep "not stripped"|awk '{print $1}'|cut -d: -f1); do
-    strip $fat &>/dev/null;
-done
 
-# copy any dynamically linked libaries used by ERTS into release
-for lib in $(ldd _rel/*/erts-*/bin/* _rel/*/lib/*/priv/lib/* 2>/dev/null|grep "=>"|awk '{print $3}'|sort|uniq); do
-    mkdir -p $(dirname _rel/$1$lib)
-    cp -Lv $lib _rel/$1$lib
-done
+-module(mkimage).
+-mode(compile).
 
-# ensure that the link loader is present
-case `arch` in
-    x86_64)
-        mkdir -p _rel/$1/lib64
-        cp -v /lib64/ld-linux*.so.* _rel/$1/lib64;;
 
-    aarch64)
-        cp -v /lib/ld-linux*.so.* _rel/$1/lib;;
-esac
+main([]) ->
+    ?FUNCTION_NAME(
+       lists:foldl(
+         fun
+             (Key, A) ->
+                 A#{Key => configuration(Key)}
+         end,
+         #{},
+         [application, release, erts]));
+
+main(Configuration) ->
+    strip(Configuration),
+    copy_dependent_so(Configuration),
+    copy_ld_linux_so(Configuration),
+    link_erts(Configuration),
+    link_release(Configuration).
+
+
+configuration(application) ->
+    {ok, [{application, Name, Properties}]} = file:consult(app()),
+    #{name => Name, properties => proplists:to_map(Properties)};
+
+configuration(release) ->
+    {ok, Configuration} = file:consult("relx.config"),
+    {release, {Name, Version}, _} = proplists:lookup(release, Configuration),
+    #{name => Name, version => Version};
+
+configuration(erts) ->
+    #{version => erlang:system_info(version)}.
+
+
+app() ->
+    [Filename] = filelib:wildcard("ebin/*.app"),
+    Filename.
+
+
+strip(#{release := #{name := Release}, erts := #{version := ERTS}} = Configuration) ->
+    ?FUNCTION_NAME(Configuration,
+                   filelib:wildcard(
+                     filename:join(["_rel",
+                                    Release,
+                                    "erts-" ++ ERTS,
+                                    "bin",
+                                    "*"]))).
+
+
+strip(_Configuration, Filenames) ->
+    {ok, MP} = re:compile("not stripped"),
+    lists:foreach(
+      fun
+          (Filename) ->
+              os:cmd("/usr/bin/strip " ++ Filename)
+      end,
+      lists:filter(
+        fun
+            (Filename) ->
+                nomatch /= re:run(os:cmd("/usr/bin/file " ++ Filename), MP)
+        end,
+        filelib:wildcard(Filenames))).
+
+
+copy_dependent_so(Configuration) ->
+    ?FUNCTION_NAME(Configuration, dependent_so()).
+
+
+copy_dependent_so(#{release := #{name := Release}} = Configuration, [Source | Sources]) ->
+    Destination = filename:join(["_rel",
+                                 Release,
+                                 tl(Source)]),
+    ok = filelib:ensure_dir(Destination),
+    {ok, _} = file:copy(Source, Destination),
+    ?FUNCTION_NAME(Configuration, Sources);
+
+copy_dependent_so(_, []) ->
+    ok.
+
+
+dependent_so() ->
+    {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
+    lists:usort(
+      lists:flatmap(
+        fun
+            (Directory) ->
+                {match, Matches} = re:run(
+                                     os:cmd("/usr/bin/ldd " ++ Directory),
+                                     MP,
+                                     [global, {capture, all_but_first, list}]),
+
+                [Library || [Library] <- Matches]
+        end,
+        ["_rel/*/erts-*/bin/*", "_rel/*/lib/*/priv/lib/*"])).
+
+
+copy_ld_linux_so(Configuration) ->
+    copy_dependent_so(Configuration, filelib:wildcard("/lib*/ld-linux*.so.*")).
+
+
+link_erts(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
+    ok = file:make_symlink(
+           "erts-" ++ ERTS,
+           filename:join(["_rel", Release, "erts"])).
+
+
+link_release(#{release := #{name := Release, version := Version}}) ->
+    ok = file:make_symlink(
+           filename:join(["releases", Version]),
+           filename:join(["_rel",
+                          Release,
+                          "release"])),
+
+    ok = file:make_symlink(
+           filename:join(["_rel", Release]),
+           "_release").
