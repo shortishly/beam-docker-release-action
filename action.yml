@@ -35,6 +35,9 @@ runs:
       uses: docker/setup-qemu-action@v2
     - name: set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+    - name: Copy BEAM Release Action Dockerfile
+      run: cp -r $GITHUB_ACTION_PATH/Dockerfile .
+      shell: bash
     - name: Copy BEAM Release Action Scripts
       run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
       shell: bash
