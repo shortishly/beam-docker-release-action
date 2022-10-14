@@ -132,4 +132,4 @@ link_release(#{release := #{name := Release, version := Version}}) ->
 
     ok = file:make_symlink(
            filename:join(["_rel", Release]),
-           "_release").
+           "_image").
