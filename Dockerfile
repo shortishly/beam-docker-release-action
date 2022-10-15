@@ -18,9 +18,6 @@ FROM erlang:${OTP_VERSION} as build
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
-LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
-LABEL org.opencontainers.image.description="BEAM docker release from scratch"
-
 RUN mkdir -p /${GITHUB_REPOSITORY}
 WORKDIR /${GITHUB_REPOSITORY}
 ADD / /${GITHUB_REPOSITORY}/
@@ -30,6 +27,11 @@ RUN beam-docker-release-action/mkimage
 
 FROM scratch
 ARG GITHUB_REPOSITORY
+
+LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
+LABEL org.opencontainers.image.description="BEAM docker release from scratch"
+LABEL org.opencontainers.image.licenses="http://www.apache.org/licenses/LICENSE-2.0"
+LABEL org.opencontainers.image.url="https://github.com/shortishly/beam-docker-release-action"
 
 ENV BINDIR /erts/bin
 ENV TZ=GMT

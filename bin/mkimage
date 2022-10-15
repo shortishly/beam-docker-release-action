@@ -34,11 +34,30 @@ main([]) ->
          [application, release, erts]));
 
 main(Configuration) ->
+    output(Configuration),
     strip(Configuration),
     copy_dependent_so(Configuration),
     copy_ld_linux_so(Configuration),
     link_erts(Configuration),
     link_release(Configuration).
+
+
+output(Configuration) ->
+    ?FUNCTION_NAME(maps:iterator(Configuration), []).
+
+output(I0, Path) ->
+    case maps:next(I0) of
+        {Key, Value, I1} when is_map(Value) ->
+            ?FUNCTION_NAME(maps:iterator(Value), [Key | Path]),
+            ?FUNCTION_NAME(I1, Path);
+
+        {Key, Value, I1} ->
+            set_output([Key | Path], Value),
+            ?FUNCTION_NAME(I1, Path);
+
+        none ->
+            ok
+    end.
 
 
 configuration(application) ->
@@ -64,7 +83,8 @@ strip(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
     lists:foreach(
       fun
           (Filename) ->
-              [] = os:cmd("/usr/bin/strip " ++ Filename)
+              [] = os:cmd("/usr/bin/strip " ++ Filename),
+              debug(Filename ++ ", stripped.")
       end,
       lists:filter(
         fun
@@ -85,16 +105,16 @@ copy_dependent_so(Configuration) ->
 
 copy_dependent_so(#{release := #{name := Release}} = Configuration, [Source | Sources]) ->
     {ok, SourceInfo} = file:read_file_info(Source),
-
     Destination = filename:join(["_rel",
                                  Release,
                                  tl(Source)]),
     ok = filelib:ensure_dir(Destination),
     {ok, _} = file:copy(Source, Destination),
-
     {ok, DestinationInfo} = file:read_link_info(Destination),
-    ok = file:write_file_info(Destination, DestinationInfo#file_info{mode = SourceInfo#file_info.mode}),
-
+    ok = file:write_file_info(
+           Destination,
+           DestinationInfo#file_info{mode = SourceInfo#file_info.mode}),
+    debug(Source ++ ", copied."),
     ?FUNCTION_NAME(Configuration, Sources);
 
 copy_dependent_so(_, []) ->
@@ -137,3 +157,30 @@ link_release(#{release := #{name := Release, version := Version}}) ->
     ok = file:make_symlink(
            filename:join(["_rel", Release]),
            "_image").
+
+
+set_output(Path, Value) when is_atom(Value) ->
+    io:format("::set-output name=~s::~s~n", [path(Path), Value]);
+
+set_output(_, []) ->
+    nop;
+
+set_output(Path, Value) ->
+    case io_lib:printable_list(Value) of
+        true ->
+            io:format("::set-output name=~s::~s~n", [path(Path), Value]);
+
+        false ->
+            nop
+    end.
+
+
+path(Path) ->
+    lists:concat(
+      lists:join(
+        ".",
+        lists:reverse(Path))).
+
+
+debug(Message) ->
+    io:format("::debug::~p~n", [Message]).
