@@ -17,6 +17,9 @@
 
 
 -module(mkimage).
+
+
+-include_lib("kernel/include/file.hrl").
 -mode(compile).
 
 
@@ -86,11 +89,17 @@ copy_dependent_so(Configuration) ->
 
 
 copy_dependent_so(#{release := #{name := Release}} = Configuration, [Source | Sources]) ->
+    {ok, SourceInfo} = file:read_file_info(Source),
+
     Destination = filename:join(["_rel",
                                  Release,
                                  tl(Source)]),
     ok = filelib:ensure_dir(Destination),
     {ok, _} = file:copy(Source, Destination),
+
+    {ok, DestinationInfo} = file:read_link_info(Destination),
+    ok = file:write_file_info(Destination, DestinationInfo#file_info{mode = SourceInfo#file_info.mode}),
+
     ?FUNCTION_NAME(Configuration, Sources);
 
 copy_dependent_so(_, []) ->
