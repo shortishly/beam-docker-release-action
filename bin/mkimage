@@ -59,29 +59,24 @@ app() ->
     Filename.
 
 
-strip(#{release := #{name := Release}, erts := #{version := ERTS}} = Configuration) ->
-    ?FUNCTION_NAME(Configuration,
-                   filelib:wildcard(
-                     filename:join(["_rel",
-                                    Release,
-                                    "erts-" ++ ERTS,
-                                    "bin",
-                                    "*"]))).
-
-
-strip(_Configuration, Filenames) ->
+strip(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
     {ok, MP} = re:compile("not stripped"),
     lists:foreach(
       fun
           (Filename) ->
-              os:cmd("/usr/bin/strip " ++ Filename)
+              [] = os:cmd("/usr/bin/strip " ++ Filename)
       end,
       lists:filter(
         fun
             (Filename) ->
                 nomatch /= re:run(os:cmd("/usr/bin/file " ++ Filename), MP)
         end,
-        filelib:wildcard(Filenames))).
+        filelib:wildcard(
+          filename:join(["_rel",
+                         Release,
+                         "erts-" ++ ERTS,
+                         "bin",
+                         "*"])))).
 
 
 copy_dependent_so(Configuration) ->
