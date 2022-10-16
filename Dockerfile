@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ARG OTP_VERSION
-FROM erlang:${OTP_VERSION} as build
+ARG BUILD_IMAGE
+FROM ${BUILD_IMAGE} as build
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
