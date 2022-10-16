@@ -11,15 +11,15 @@ inputs:
   password:
     description: Registry Password
     required: true
-  build-otp-version:
-    description: Build OTP Version
-    default: 25.1.1.0
+  build-image:
+    description: Build image
+    default: erlang:25.1.1.0
   build-command:
     description: Build command
     default: make
   build-platforms:
     description: Build platforms
-    default: linux/amd64
+    default: linux/amd64,linux/arm/v7
 runs:
   using: composite
   steps:
@@ -47,7 +47,7 @@ runs:
         context: .
         platforms: ${{inputs.build-platforms}}
         build-args: |
-          OTP_VERSION=${{inputs.build-otp-version}}
+          BUILD_IMAGE=${{inputs.build-image}}
           GITHUB_REPOSITORY=${{ github.repository }}
           BUILD_COMMAND=${{ inputs.build-command }}
         push: true

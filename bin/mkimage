@@ -23,17 +23,19 @@
 -mode(compile).
 
 
-main([]) ->
-    ?FUNCTION_NAME(
-       lists:foldl(
-         fun
-             (Key, A) ->
-                 A#{Key => configuration(Key)}
-         end,
-         #{},
-         [application, release, erts]));
+main([])                          ->
+    Build = configuration(build),
 
-main(Configuration) ->
+    ?FUNCTION_NAME(
+         lists:foldl(
+           fun
+               (Key, A) ->
+                   A#{Key => configuration(Key, Build)}
+           end,
+           #{build => Build},
+           [application, release, erts]));
+
+main(Configuration)               ->
     output(Configuration),
     strip(Configuration),
     copy_dependent_so(Configuration),
@@ -42,10 +44,10 @@ main(Configuration) ->
     link_release(Configuration).
 
 
-output(Configuration) ->
+output(Configuration)             ->
     ?FUNCTION_NAME(maps:iterator(Configuration), []).
 
-output(I0, Path) ->
+output(I0, Path)                  ->
     case maps:next(I0) of
         {Key, Value, I1} when is_map(Value) ->
             ?FUNCTION_NAME(maps:iterator(Value), [Key | Path]),
@@ -60,25 +62,57 @@ output(I0, Path) ->
     end.
 
 
-configuration(application) ->
-    {ok, [{application, Name, Properties}]} = file:consult(app()),
+configuration(application, Build) ->
+    {ok, [{application, Name, Properties}]} = file:consult(app(Build)),
     #{name => Name, properties => proplists:to_map(Properties)};
 
-configuration(release) ->
-    {ok, Configuration} = file:consult("relx.config"),
-    {release, {Name, Version}, _} = proplists:lookup(release, Configuration),
+configuration(release, Build)     ->
+    {release, {Name, Version}, _} = proplists:lookup(release, relx(Build)),
     #{name => Name, version => Version};
 
-configuration(erts) ->
+configuration(erts, _Build)       ->
     #{version => erlang:system_info(version)}.
 
 
-app() ->
+configuration(build)              ->
+    case lists:foldl(
+           fun
+               (Filename, A) ->
+                   A#{Filename => filelib:is_file(Filename)}
+           end,
+           #{},
+           ["erlang.mk", "Makefile", "relx.config", "rebar.config", "_rel", "_build"]) of
+
+        #{"_rel" := true, "Makefile" := true, "erlang.mk" := true} ->
+            #{name => erlang_mk, prefix => "_rel"};
+
+        #{"_build" := true, "rebar.config" := true} ->
+            #{name => rebar, prefix => "_build/default/rel"}
+    end.
+
+
+relx(#{name := erlang_mk})        ->
+    {ok, Relx} = file:consult("relx.config"),
+    Relx;
+
+relx(#{name := rebar})            ->
+    {ok, RebarConfig} = file:consult("rebar.config"),
+    {relx, Relx} = proplists:lookup(relx, RebarConfig),
+    Relx.
+
+
+app(#{name := erlang_mk})         ->
     [Filename] = filelib:wildcard("ebin/*.app"),
+    Filename;
+
+app(#{name := rebar})             ->
+    [Filename] = filelib:wildcard("src/*.app.src"),
     Filename.
 
 
-strip(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
+strip(#{build := #{prefix := Prefix},
+        release := #{name := Release},
+        erts := #{version := ERTS}}) ->
     {ok, MP} = re:compile("not stripped"),
     lists:foreach(
       fun
@@ -92,22 +126,22 @@ strip(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
                 nomatch /= re:run(os:cmd("/usr/bin/file " ++ Filename), MP)
         end,
         filelib:wildcard(
-          filename:join(["_rel",
+          filename:join([Prefix,
                          Release,
                          "erts-" ++ ERTS,
                          "bin",
                          "*"])))).
 
 
-copy_dependent_so(Configuration) ->
-    ?FUNCTION_NAME(Configuration, dependent_so()).
+copy_dependent_so(Configuration)  ->
+    ?FUNCTION_NAME(Configuration, dependent_so(Configuration)).
 
 
-copy_dependent_so(#{release := #{name := Release}} = Configuration, [Source | Sources]) ->
+copy_dependent_so(#{build := #{prefix := Prefix},
+                    release := #{name := Release}} = Configuration,
+                  [Source | Sources]) ->
     {ok, SourceInfo} = file:read_file_info(Source),
-    Destination = filename:join(["_rel",
-                                 Release,
-                                 tl(Source)]),
+    Destination = filename:join([Prefix, Release, tl(Source)]),
     ok = filelib:ensure_dir(Destination),
     {ok, _} = file:copy(Source, Destination),
     {ok, DestinationInfo} = file:read_link_info(Destination),
@@ -117,16 +151,20 @@ copy_dependent_so(#{release := #{name := Release}} = Configuration, [Source | So
     debug(Source ++ ", copied."),
     ?FUNCTION_NAME(Configuration, Sources);
 
-copy_dependent_so(_, []) ->
+copy_dependent_so(_, [])          ->
     ok.
 
 
-dependent_so() ->
+dependent_so(#{build := #{prefix := Prefix},
+               release := #{name := Release},
+               erts := #{version := ERTS}}) ->
     {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
     lists:usort(
       lists:flatmap(
         fun
             (Directory) ->
+                debug(Directory),
+
                 {match, Matches} = re:run(
                                      os:cmd("/usr/bin/ldd " ++ Directory),
                                      MP,
@@ -134,29 +172,52 @@ dependent_so() ->
 
                 [Library || [Library] <- Matches]
         end,
-        ["_rel/*/erts-*/bin/*", "_rel/*/lib/*/priv/lib/*"])).
+        [filename:join(
+           [Prefix,
+            Release,
+            "erts-" ++ ERTS,
+            "bin",
+            "*"]),
+         filename:join(
+           [Prefix,
+            Release,
+            "lib/*/priv/lib/*"])])).
 
 
-copy_ld_linux_so(Configuration) ->
+copy_ld_linux_so(Configuration)   ->
     copy_dependent_so(Configuration, filelib:wildcard("/lib*/ld-linux*.so.*")).
 
 
-link_erts(#{release := #{name := Release}, erts := #{version := ERTS}}) ->
-    ok = file:make_symlink(
-           "erts-" ++ ERTS,
-           filename:join(["_rel", Release, "erts"])).
+link_erts(#{build := #{prefix := Prefix},
+            release := #{name := Release},
+            erts := #{version := ERTS}}) ->
+    make_symlink(
+      "erts-" ++ ERTS,
+      filename:join([Prefix, Release, "erts"])).
 
 
-link_release(#{release := #{name := Release, version := Version}}) ->
-    ok = file:make_symlink(
-           filename:join(["releases", Version]),
-           filename:join(["_rel",
-                          Release,
-                          "release"])),
+link_release(#{build := #{prefix := Prefix},
+               release := #{name := Release,
+                            version := Version}}) ->
+    make_symlink(
+      filename:join(["releases", Version]),
+      filename:join([Prefix,
+                     Release,
+                     "release"])),
 
-    ok = file:make_symlink(
-           filename:join(["_rel", Release]),
-           "_image").
+    make_symlink(
+      filename:join([Prefix, Release]),
+      "_image").
+
+
+make_symlink(Existing, New) ->
+    case file:make_symlink(Existing, New) of
+        ok ->
+            ok;
+
+        {error, eexist} ->
+            ok
+    end.
 
 
 set_output(Path, Value) when is_atom(Value) ->
