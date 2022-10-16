@@ -20,6 +20,12 @@ inputs:
   build-platforms:
     description: Build platforms
     default: linux/amd64,linux/arm/v7
+  build-tag:
+    description: Build tag
+    default: ${{ github.repository }}
+  build-push:
+    description: Build push image
+    default: true
 runs:
   using: composite
   steps:
@@ -50,5 +56,5 @@ runs:
           BUILD_IMAGE=${{inputs.build-image}}
           GITHUB_REPOSITORY=${{ github.repository }}
           BUILD_COMMAND=${{ inputs.build-command }}
-        push: true
-        tags: ${{ inputs.registry }}/${{ github.repository }}
+        push: ${{ inputs.build-push }}
+        tags: ${{ inputs.registry }}/${{ inputs.build-tag }}
