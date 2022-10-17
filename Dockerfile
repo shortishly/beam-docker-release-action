@@ -36,6 +36,6 @@ LABEL org.opencontainers.image.url="https://github.com/shortishly/beam-docker-re
 ENV BINDIR /erts/bin
 ENV TZ=GMT
 
-ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
+ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot_var", "RELEASE_LIB", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
 
 COPY --from=build /${GITHUB_REPOSITORY}/_image/ /
