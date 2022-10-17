@@ -44,6 +44,7 @@ ENV TZ GMT
 # elixir - note that .config is not present on RELEASE_SYS_CONFIG
 ENV RELEASE_SYS_CONFIG /release/sys
 ENV RELEASE_VM_ARGS /release/vm.args
+ENV RELEASE_ROOT /
 
 ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot_var", "RELEASE_LIB", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
 
