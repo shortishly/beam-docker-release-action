@@ -35,9 +35,7 @@ LABEL org.opencontainers.image.url="https://github.com/shortishly/beam-docker-re
 
 ENV BINDIR /erts/bin
 
-# UTF-8
 ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
 
 ENV TZ GMT
 
@@ -48,4 +46,5 @@ ENV RELEASE_ROOT /
 
 ENTRYPOINT ["/erts/bin/erlexec", "-boot_var", "ERTS_LIB_DIR", "/lib", "-boot_var", "RELEASE_LIB", "/lib", "-boot", "/release/start", "-noinput", "-no_epmd", "-proto_dist", "inet_tls", "-config", "/release/sys.config", "-args_file", "/release/vm.args"]
 
+COPY --from=build /usr/lib/locale/${LANG}/ /usr/lib/locale/${LANG}/
 COPY --from=build /${GITHUB_REPOSITORY}/_image/ /
