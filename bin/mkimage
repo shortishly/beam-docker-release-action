@@ -81,19 +81,41 @@ configuration(build)              ->
                    A#{Filename => filelib:is_file(Filename)}
            end,
            #{},
-           ["erlang.mk", "Makefile", "relx.config", "rebar.config", "_rel", "_build"]) of
+           ["erlang.mk",
+            "Makefile",
+            "relx.config",
+            "rebar.config",
+            "mix.exs",
+            "_rel",
+            "_build"]) of
 
         #{"_rel" := true, "Makefile" := true, "erlang.mk" := true} ->
             #{name => erlang_mk, prefix => "_rel"};
 
         #{"_build" := true, "rebar.config" := true} ->
-            #{name => rebar, prefix => "_build/default/rel"}
+            #{name => rebar, prefix => "_build/default/rel"};
+
+        #{"_build" := true, "mix.exs" := true} ->
+            #{name => mix, prefix => "_build/dev/rel"}
     end.
 
 
 relx(#{name := erlang_mk})        ->
     {ok, Relx} = file:consult("relx.config"),
     Relx;
+
+relx(#{name := mix}) ->
+    ["_build",
+     _,
+     "rel",
+     Name,
+     "releases",
+     Version] = filename:split(
+                  lists:filter(
+                    fun filelib:is_dir/1,
+                    filelib:wildcard(
+                      "_build/dev/rel/*/releases/*"))),
+    [{release, {Name, Version}, undefined}];
 
 relx(#{name := rebar})            ->
     {ok, RebarConfig} = file:consult("rebar.config"),
@@ -103,6 +125,14 @@ relx(#{name := rebar})            ->
 
 app(#{name := erlang_mk})         ->
     [Filename] = filelib:wildcard("ebin/*.app"),
+    Filename;
+
+app(#{name := mix}) ->
+    ["_build", _, "rel", Release] = filename:split(filelib:wildcard("_build/*/rel/*")),
+    [Filename] = filelib:wildcard(filename:join(
+                                    ["_build/*/rel/*/lib",
+                                     Release ++ "-*",
+                                     "ebin/*.app"])),
     Filename;
 
 app(#{name := rebar})             ->
