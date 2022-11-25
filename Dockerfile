@@ -28,15 +28,8 @@ RUN beam-docker-release-action/mkimage
 FROM scratch
 ARG GITHUB_REPOSITORY
 
-LABEL org.opencontainers.image.authors="peter.james.morgan@gmail.com"
-LABEL org.opencontainers.image.description="BEAM docker release from scratch"
-LABEL org.opencontainers.image.licenses="http://www.apache.org/licenses/LICENSE-2.0"
-LABEL org.opencontainers.image.url="https://github.com/shortishly/beam-docker-release-action"
-
 ENV BINDIR /erts/bin
-
 ENV LANG C.UTF-8
-
 ENV TZ GMT
 
 # elixir - note that .config is not present on RELEASE_SYS_CONFIG
