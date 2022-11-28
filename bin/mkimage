@@ -104,7 +104,7 @@ relx(#{name := erlang_mk})        ->
     {ok, Relx} = file:consult("relx.config"),
     Relx;
 
-relx(#{name := mix}) ->
+relx(#{name := mix, prefix := Prefix}) ->
     ["_build",
      _,
      "rel",
@@ -114,7 +114,9 @@ relx(#{name := mix}) ->
                   lists:filter(
                     fun filelib:is_dir/1,
                     filelib:wildcard(
-                      "_build/dev/rel/*/releases/*"))),
+                      filename:join(
+                        Prefix,
+                        "*/releases/*")))),
     [{release, {Name, Version}, undefined}];
 
 relx(#{name := rebar})            ->
