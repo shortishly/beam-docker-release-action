@@ -96,7 +96,7 @@ configuration(build)              ->
             #{name => rebar, prefix => "_build/default/rel"};
 
         #{"_build" := true, "mix.exs" := true} ->
-            #{name => mix, prefix => "_build/dev/rel"}
+            #{name => mix, prefix => filename:join(["_build", mix_env(), + "rel"])}
     end.
 
 
@@ -275,3 +275,7 @@ path(Path) ->
 
 debug(Message) ->
     io:format("::debug::~p~n", [Message]).
+
+
+mix_env() ->
+    os:getenv("MIX_ENV", "dev").
