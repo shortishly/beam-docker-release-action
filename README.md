@@ -1,5 +1,22 @@
 # BEAM Docker Release action
 
+A github action that builds BEAM releases into a `from scratch`
+container.
+
+When packaging an application as a [docker][docker-com] container it
+is too easy to just be lazy and put `FROM debian` (other distributions
+are available, replace `debian` with your distribution of choice). For
+sure it is going to work, but you have just included dozens of
+libraries and binaries that your application [just does not
+need][dockerfile-best-practices]. An image that could be tens of
+megabytes is now at least several hundred - we are building containers
+not virtual machines here!
+
+We use a [multi-stage build][docker-building-multi-stage], building
+the release, and then copying only the release and its dependencies
+into a [scratch base image][baseimages-scratch]. Only the release and
+any shared libraries it requires to run are present. There is no
+shell, or any OS commands.
 
 This is a composite action that:
 - Logs into a container repository
@@ -142,10 +159,14 @@ The platforms that are used for the build. This defaults to
 
 None.
 
+[docker-building-multi-stage]: https://docs.docker.com/build/building/multi-stage/
+[docker-com]: https://www.docker.com
+[dockerfile-best-practices]: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices
 [elixir]: https://elixir-lang.org
-[erlang-mk]: https://erlang.mk
 [erlang-mk-release]: https://erlang.mk/guide/relx.html
+[erlang-mk]: https://erlang.mk
 [erlang]: https://www.erlang.org
+[github-workflow-push-event]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#push
 [hello-world-elixir-phx]: https://github.com/shortishly/hello_world/tree/elixir-phx
 [hello-world-erlang-mk]: https://github.com/shortishly/hello_world/tree/erlang-mk
 [hello-world-rebar3]: https://github.com/shortishly/hello_world/tree/rebar3
@@ -155,4 +176,4 @@ None.
 [pgec]: https://github.com/shortishly/pgec/blob/main/.github/workflows/release.yml
 [phoenix]: https://www.phoenixframework.org
 [rebar3]: https://rebar3.org
-[github-workflow-push-event]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#push
+
