@@ -1,6 +1,6 @@
 # BEAM Docker Release action
 
-A github action that builds BEAM releases into a `from scratch`
+A GitHub action that builds BEAM releases into a `from scratch`
 container.
 
 When packaging an application as a [docker][docker-com] container it
@@ -41,7 +41,7 @@ Some real examples:
 
 ### Elixir
 
-The following example is triggered [push
+The following example is triggered by a [push
 event][github-workflow-push-event] to build an [Elixir Mix
 Prod Release][mix-release].
 
@@ -68,7 +68,7 @@ jobs:
 ### Erlang/OTP with erlang.mk
 
 
-The following example is triggered [push
+The following example is triggered by a [push
 event][github-workflow-push-event] to build an [Erlang/OTP Release with erlang.mk][erlang-mk-release].
 
 
@@ -95,7 +95,7 @@ jobs:
 ### Erlang/OTP with rebar3
 
 
-The following example is triggered [push
+The following example is triggered by a [push
 event][github-workflow-push-event] to build an [Erlang/OTP Release with rebar3][rebar3].
 
 
@@ -149,7 +149,7 @@ appropriate version of `erlang` or `elixir`.
 ## build-platforms
 
 The platforms that are used for the build. This defaults to
-`linux/arm64`.
+`linux/amd64`.
 
 ## build-tags
 
