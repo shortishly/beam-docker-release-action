@@ -159,6 +159,7 @@ The platforms that are used for the build. This defaults to
 
 None.
 
+[baseimages-scratch]: https://docs.docker.com/engine/userguide/eng-image/baseimages/
 [docker-building-multi-stage]: https://docs.docker.com/build/building/multi-stage/
 [docker-com]: https://www.docker.com
 [dockerfile-best-practices]: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices
