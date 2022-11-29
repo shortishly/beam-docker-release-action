@@ -12,13 +12,12 @@ need][dockerfile-best-practices]. An image that could be tens of
 megabytes is now at least several hundred - we are building containers
 not virtual machines here!
 
-We use a [multi-stage build][docker-building-multi-stage], building
-the release, and then copying only the release and its dependencies
-into a [scratch base image][baseimages-scratch]. Only the release and
-any shared libraries it requires to run are present. There is no
-shell, or any OS commands.
+We use a [multi-stage build][docker-building-multi-stage], coping only
+the release and its runtime dependencies into a [scratch base
+image][baseimages-scratch]. There is no shell, or any executable other
+than those required to run the BEAM.
 
-This is a composite action that:
+This is a [composite action][github-composite-action] that:
 - Logs into a container repository
 - Creates a minimal docker image of a BEAM release from scratch
 - Pushes the image to the container repository
@@ -59,7 +58,14 @@ jobs:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-          build-command: mix do local.hex --force + deps.get + local.rebar --force + compile + assets.deploy + phx.digest + release --overwrite
+          build-command: >-
+            mix do local.hex --force +
+            deps.get +
+            local.rebar --force +
+            compile +
+            assets.deploy +
+            phx.digest +
+            release --overwrite
           build-image: elixir:1.14.2
           build-platforms: linux/amd64
           build-tags: ghcr.io/${{github.repository}}:elixir-phx
@@ -167,6 +173,7 @@ None.
 [erlang-mk-release]: https://erlang.mk/guide/relx.html
 [erlang-mk]: https://erlang.mk
 [erlang]: https://www.erlang.org
+[github-composite-action]: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 [github-workflow-push-event]: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#push
 [hello-world-elixir-phx]: https://github.com/shortishly/hello_world/tree/elixir-phx
 [hello-world-erlang-mk]: https://github.com/shortishly/hello_world/tree/erlang-mk
@@ -177,4 +184,3 @@ None.
 [pgec]: https://github.com/shortishly/pgec/blob/main/.github/workflows/release.yml
 [phoenix]: https://www.phoenixframework.org
 [rebar3]: https://rebar3.org
-
