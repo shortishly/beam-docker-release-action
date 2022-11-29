@@ -19,7 +19,7 @@ inputs:
     default: make
   build-platforms:
     description: Build platforms
-    default: linux/amd64,linux/arm/v7
+    default: linux/amd64
   build-tags:
     description: Build tags
     required: true
