@@ -23,9 +23,18 @@ This is a [composite action][github-composite-action] that:
 - Pushes the image to the container repository
 
 Supporting:
+
 - [Elixir][elixir] with the [Phoenix Framework][phoenix] using [mix][mix] to build;
 - [Erlang/OTP][erlang] with [erlang.mk][erlang-mk];
 - [Erlang/OTP][erlang] with [rebar3][rebar3]
+
+Platforms:
+
+- linux/amd64
+- linux/arm64
+
+Default will create a [multi-platform][docker-building-multiplatform]
+image for both `amd64` and `arm64`.
 
 
 Hello World! Simple examples for both Elixir and Erlang can be found at:
@@ -156,7 +165,7 @@ appropriate version of `erlang` or `elixir`.
 ## build-platforms
 
 The platforms that are used for the build. This defaults to
-`linux/amd64`.
+`linux/amd64,linux/arm64`.
 
 ## build-tags
 
@@ -168,6 +177,7 @@ None.
 
 [baseimages-scratch]: https://docs.docker.com/engine/userguide/eng-image/baseimages/
 [docker-building-multi-stage]: https://docs.docker.com/build/building/multi-stage/
+[docker-building-multiplatform]: https://docs.docker.com/build/building/multi-platform/
 [docker-com]: https://www.docker.com
 [dockerfile-best-practices]: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices
 [elixir]: https://elixir-lang.org
