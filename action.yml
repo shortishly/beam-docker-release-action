@@ -1,6 +1,9 @@
 ---
 name: BEAM Docker Release
 description: Publish BEAM release as a Docker image
+branding:
+  icon: 'download-cloud'
+  color: 'gray-dark'
 inputs:
   registry:
     description: Container Registry
