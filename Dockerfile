@@ -18,6 +18,9 @@ FROM ${BUILD_IMAGE} as build
 ARG GITHUB_REPOSITORY
 ARG BUILD_COMMAND
 
+# https://github.com/erlang/otp/pull/6340
+ENV ERL_AFLAGS="+JPperf true"
+
 ENV MIX_ENV="prod"
 
 RUN mkdir -p /${GITHUB_REPOSITORY}

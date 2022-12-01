@@ -4,10 +4,10 @@ A GitHub action that builds BEAM releases into a `from scratch`
 container.
 
 When packaging an application as a [docker][docker-com] container it
-is too easy to just be lazy and put `FROM debian` (other distributions
-are available, replace `debian` with your distribution of choice). For
-sure it is going to work, but you have just included dozens of
-libraries and binaries that your application [just does not
+is too easy to just put `FROM debian` (other distributions are available,
+replace `debian` with your distribution of choice). For sure it is
+going to work, but you have just included dozens of libraries and
+binaries that your application [just does not
 need][dockerfile-best-practices]. An image that could be tens of
 megabytes is now at least several hundred - we are building containers
 not virtual machines here!
@@ -26,6 +26,7 @@ Supporting:
 - [Elixir][elixir] with the [Phoenix Framework][phoenix] using [mix][mix] to build;
 - [Erlang/OTP][erlang] with [erlang.mk][erlang-mk];
 - [Erlang/OTP][erlang] with [rebar3][rebar3]
+
 
 Hello World! Simple examples for both Elixir and Erlang can be found at:
 - [Elixir with Phoenix][hello-world-elixir-phx]
