@@ -25,7 +25,7 @@ inputs:
     default: linux/amd64,linux/arm64
   build-tags:
     description: Build tags
-    default: ${{inputs.registry}}/${{github.repository}}:${{github.ref_name}}
+    required: true
   build-push:
     description: Build push image
     default: true
