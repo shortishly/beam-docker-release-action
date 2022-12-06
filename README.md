@@ -12,7 +12,8 @@ need][dockerfile-best-practices]. An image that could be tens of
 megabytes is now at least several hundred - we are building containers
 not virtual machines here!
 
-We use a [multi-stage build][docker-building-multi-stage], coping only
+Using a [multi-stage][docker-building-multi-stage],
+[multi-platform][docker-building-multi-platform], build coping only
 the release and its runtime dependencies into a [scratch base
 image][baseimages-scratch]. There is no shell, or any executable other
 than those required to run the BEAM.
@@ -33,7 +34,7 @@ Platforms:
 - linux/amd64
 - linux/arm64
 
-Default will create a [multi-platform][docker-building-multiplatform]
+The default will create a [multi-platform][docker-building-multi-platform]
 image for both `amd64` and `arm64`.
 
 
@@ -63,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Beam Docker Release
-        uses: shortishly/beam-docker-release-action@v1.23
+        uses: shortishly/beam-docker-release-action@v1
         with:
           registry: ghcr.io
           username: ${{github.actor}}
@@ -77,7 +78,6 @@ jobs:
             phx.digest +
             release --overwrite
           build-image: elixir:1.14.2
-          build-platforms: linux/amd64
           build-tags: ghcr.io/${{github.repository}}:elixir-phx
 ```
 
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Beam Docker Release
-        uses: shortishly/beam-docker-release-action@v1.22
+        uses: shortishly/beam-docker-release-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -171,13 +171,21 @@ The platforms that are used for the build. This defaults to
 
 **Required** The tags applied to the release.
 
+## image-source
+
+The Git URL to the repository. For example, git://github.com/codertocat/hello-world.git.
+
+## image-description
+
+## image-license
+
 ## Outputs
 
 None.
 
 [baseimages-scratch]: https://docs.docker.com/engine/userguide/eng-image/baseimages/
 [docker-building-multi-stage]: https://docs.docker.com/build/building/multi-stage/
-[docker-building-multiplatform]: https://docs.docker.com/build/building/multi-platform/
+[docker-building-multi-platform]: https://docs.docker.com/build/building/multi-platform/
 [docker-com]: https://www.docker.com
 [dockerfile-best-practices]: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices
 [elixir]: https://elixir-lang.org

@@ -32,6 +32,13 @@ RUN beam-docker-release-action/mkimage
 
 FROM scratch
 ARG GITHUB_REPOSITORY
+ARG IMAGE_DESCRIPTION
+ARG IMAGE_LICENSES
+ARG IMAGE_SOURCE
+
+LABEL org.opencontainers.image.description=${IMAGE_DESCRIPTION}
+LABEL org.opencontainers.image.licenses=${IMAGE_LICENSES}
+LABEL org.opencontainers.image.source=${IMAGE_SOURCE}
 
 ENV BINDIR /erts/bin
 ENV LANG C.UTF-8

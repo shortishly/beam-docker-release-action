@@ -25,10 +25,17 @@ inputs:
     default: linux/amd64,linux/arm64
   build-tags:
     description: Build tags
-    required: true
+    default: ${{inputs.registry}}/${{github.repository}}:${{github.ref_name}}
   build-push:
     description: Build push image
     default: true
+  image-description:
+    description: A text-only description limited to 512 characters.
+  image-licenses:
+    description: A SPDX license identifier limited to 256 characters.
+  image-source:
+    description: The URL of the repository associated with the package.
+    default: ${{github.repositoryUrl}}
 runs:
   using: composite
   steps:
@@ -56,8 +63,11 @@ runs:
         context: .
         platforms: ${{inputs.build-platforms}}
         build-args: |
+          BUILD_COMMAND=${{inputs.build-command}}
           BUILD_IMAGE=${{inputs.build-image}}
-          GITHUB_REPOSITORY=${{ github.repository }}
-          BUILD_COMMAND=${{ inputs.build-command }}
+          GITHUB_REPOSITORY=${{github.repository}}
+          IMAGE_DESCRIPTION=${{inputs.image-description}}
+          IMAGE_LICENSES=${{inputs.image-licenses}}
+          IMAGE_SOURCE=${{inputs.image-source}}
         push: ${{ inputs.build-push }}
         tags: ${{ inputs.build-tags }}
