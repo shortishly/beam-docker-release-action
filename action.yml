@@ -57,6 +57,27 @@ runs:
     - name: Copy BEAM Release Action Scripts
       run: cp -r $GITHUB_ACTION_PATH/bin beam-docker-release-action
       shell: bash
+    - name: Set DOCKER_IMAGE_TAGS (nonempty inputs.build-tags)
+      run: |
+        echo "DOCKER_IMAGE_TAGS=${{inputs.build-tags}}" >> $GITHUB_ENV
+      if: inputs.build-tags != ''
+    - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags with main)
+      run: >-
+        echo "DOCKER_IMAGE_TAGS=
+        ${{inputs.registry}}/
+        ${{github.repository}}:latest"
+        >> $GITHUB_ENV
+      if: inputs.build-tags == '' && github.ref_name == 'main'
+    - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags)
+      run: >-
+        echo "DOCKER_IMAGE_TAGS=
+        ${{inputs.registry}}/
+        ${{github.repository}}:${{github.ref_name}}"
+        >> $GITHUB_ENV
+      if: inputs.build-tags == ''
+    - name: use DOCKER_IMAGE_TAGS
+      run: |
+        echo "${{env.DOCKER_IMAGE_TAGS}}"
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
