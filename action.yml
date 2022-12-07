@@ -61,6 +61,7 @@ runs:
       run: |
         echo "DOCKER_IMAGE_TAGS=${{inputs.build-tags}}" >> $GITHUB_ENV
       if: inputs.build-tags != ''
+      shell: bash
     - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags with main)
       run: >-
         echo "DOCKER_IMAGE_TAGS=
@@ -68,6 +69,7 @@ runs:
         ${{github.repository}}:latest"
         >> $GITHUB_ENV
       if: inputs.build-tags == '' && github.ref_name == 'main'
+      shell: bash
     - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags)
       run: >-
         echo "DOCKER_IMAGE_TAGS=
@@ -75,9 +77,11 @@ runs:
         ${{github.repository}}:${{github.ref_name}}"
         >> $GITHUB_ENV
       if: inputs.build-tags == ''
+      shell: bash
     - name: use DOCKER_IMAGE_TAGS
       run: |
         echo "${{env.DOCKER_IMAGE_TAGS}}"
+      shell: bash
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
