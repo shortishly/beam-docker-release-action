@@ -62,19 +62,17 @@ runs:
       if: inputs.build-tags != ''
       shell: bash
     - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags with main)
-      run: >-
-        echo "DOCKER_IMAGE_TAGS=
-        ${{inputs.registry}}/
-        ${{github.repository}}:latest"
-        >> $GITHUB_ENV
+      run:
+        "echo \"DOCKER_IMAGE_TAGS=\
+        ${{inputs.registry}}/${{github.repository}}:latest\"
+        >> $GITHUB_ENV"
       if: inputs.build-tags == '' && github.ref_name == 'main'
       shell: bash
     - name: Set DOCKER_IMAGE_TAGS (empty inputs.build-tags)
-      run: >-
-        echo "DOCKER_IMAGE_TAGS=
-        ${{inputs.registry}}/
-        ${{github.repository}}:${{github.ref_name}}"
-        >> $GITHUB_ENV
+      run:
+        "echo \"DOCKER_IMAGE_TAGS=\
+        ${{inputs.registry}}/${{github.repository}}:${{github.ref_name}}\"
+        >> $GITHUB_ENV"
       if: inputs.build-tags == ''
       shell: bash
     - name: use DOCKER_IMAGE_TAGS
