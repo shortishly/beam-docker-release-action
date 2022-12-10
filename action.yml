@@ -84,6 +84,7 @@ runs:
         echo "${{env.DOCKER_IMAGE_TAGS}}"
       shell: bash
     - name: Build and push
+      id: bpa
       uses: docker/build-push-action@v3
       with:
         context: .
@@ -97,3 +98,7 @@ runs:
           IMAGE_SOURCE=${{inputs.image-source}}
         push: ${{inputs.build-push}}
         tags: ${{env.DOCKER_IMAGE_TAGS}}
+    - name: docker image tags
+      run: |
+        echo "${{ steps.bpa.outputs.metadata.image.name }}
+      shell: bash
