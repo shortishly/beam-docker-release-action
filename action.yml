@@ -100,5 +100,5 @@ runs:
         tags: ${{env.DOCKER_IMAGE_TAGS}}
     - name: docker image tags
       run: |
-        echo "${{ steps.bpa.outputs.metadata.image.name }}
+        echo "${{ fromJSON(steps.bpa.outputs.metadata).image.name }}
       shell: bash
