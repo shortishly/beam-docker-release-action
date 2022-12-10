@@ -35,6 +35,10 @@ inputs:
   image-source:
     description: The URL of the repository associated with the package.
     default: ${{github.repositoryUrl}}
+outputs:
+  docker-image-tags:
+    description: "Docker image tags"
+    value: ${{env.DOCKER_IMAGE_TAGS}}
 runs:
   using: composite
   steps:
