@@ -36,9 +36,15 @@ inputs:
     description: The URL of the repository associated with the package.
     default: ${{github.repositoryUrl}}
 outputs:
-  docker-image-tags:
-    description: "Docker image tags"
-    value: ${{env.DOCKER_IMAGE_TAGS}}
+  imageid:
+    description: "Image ID"
+    value: ${{steps.bpa.outputs.imageid}}
+  digest:
+    description: "Image digest"
+    value: ${{steps.bpa.outputs.digest}}
+  metadata:
+    description: "Build result metadata"
+    value: ${{steps.bpa.outputs.metadata}}
 runs:
   using: composite
   steps:
@@ -98,7 +104,3 @@ runs:
           IMAGE_SOURCE=${{inputs.image-source}}
         push: ${{inputs.build-push}}
         tags: ${{env.DOCKER_IMAGE_TAGS}}
-    - name: docker image tags
-      run: |
-        echo "${{ fromJSON(steps.bpa.outputs.metadata).image.name }}
-      shell: bash
