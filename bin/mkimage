@@ -192,28 +192,37 @@ dependent_so(#{build := #{prefix := Prefix},
                erts := #{version := ERTS}}) ->
     {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
     lists:usort(
-      lists:flatmap(
-        fun
-            (Directory) ->
-                debug(Directory),
+      lists:append(
+        lists:flatmap(
+          fun ldd/1,
+          [filename:join(
+             [Prefix,
+              Release,
+              "erts-" ++ ERTS,
+              "bin",
+              "*"]),
 
-                {match, Matches} = re:run(
-                                     os:cmd("/usr/bin/ldd " ++ Directory),
-                                     MP,
-                                     [global, {capture, all_but_first, list}]),
+           filename:join(
+             [Prefix,
+              Release,
+              "lib/*/priv/lib/*"])]),
+        lists:flatmap(
+          fun
+              (SharedObject) ->
+                  [SharedObject | ldd(SharedObject)]
+          end,
+          filelib:wildcard("/lib/*/libnss*.so.*")))).
 
-                [Library || [Library] <- Matches]
-        end,
-        [filename:join(
-           [Prefix,
-            Release,
-            "erts-" ++ ERTS,
-            "bin",
-            "*"]),
-         filename:join(
-           [Prefix,
-            Release,
-            "lib/*/priv/lib/*"])])).
+
+ldd(Filename) ->
+    debug("ldd: " ++ Filename),
+
+    {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
+    {match, Matches} = re:run(
+                         os:cmd("/usr/bin/ldd " ++ Filename),
+                         MP,
+                         [global, {capture, all_but_first, list}]),
+    [Library || [Library] <- Matches].
 
 
 copy_ld_linux_so(Configuration)   ->
