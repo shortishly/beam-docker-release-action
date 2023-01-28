@@ -190,7 +190,6 @@ copy_dependent_so(_, [])          ->
 dependent_so(#{build := #{prefix := Prefix},
                release := #{name := Release},
                erts := #{version := ERTS}}) ->
-    {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
     lists:usort(
       lists:append(
         lists:flatmap(
