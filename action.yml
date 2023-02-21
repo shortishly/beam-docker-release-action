@@ -91,7 +91,7 @@ runs:
       shell: bash
     - name: Build and push
       id: bpa
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         context: .
         platforms: ${{inputs.build-platforms}}
