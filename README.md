@@ -19,6 +19,7 @@ image][baseimages-scratch]. There is no shell, or any executable other
 than those required to run the BEAM.
 
 This is a [composite action][github-composite-action] that:
+
 - Logs into a container repository
 - Creates a minimal docker image of a BEAM release from scratch
 - Pushes the image to the container repository
@@ -37,17 +38,26 @@ Platforms:
 The default will create a [multi-platform][docker-building-multi-platform]
 image for both `amd64` and `arm64`.
 
-
 Hello World! Simple examples for both Elixir and Erlang can be found at:
+
 - [Elixir with Phoenix][hello-world-elixir-phx]
 - [Erlang/OTP with erlang.mk][hello-world-erlang-mk]
 - [Erlang/OTP with rebar3][hello-world-rebar3]
 
 Some real examples:
+
 - [Erlang/OTP memcached server and client][mcd]
 - [Erlang/OTP real-time in memory database replication cache, with a memcached and REST API][pgec]
 
 ## Typical Usage
+
+Ensure that your workflow has sufficent permissions to write to ghcr
+by including in your workflow:
+
+```yaml
+permissions:
+  packages: write
+```
 
 ### Elixir
 
@@ -58,7 +68,8 @@ Prod Release][mix-release].
 ```yaml
 ---
 on: [push]
-
+permissions:
+  packages: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -83,15 +94,14 @@ jobs:
 
 ### Erlang/OTP with erlang.mk
 
-
 The following example is triggered by a [push
 event][github-workflow-push-event] to build an [Erlang/OTP Release with erlang.mk][erlang-mk-release].
-
 
 ```yaml
 ---
 on: [push]
-
+permissions:
+  packages: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -107,18 +117,16 @@ jobs:
           build-tags: ghcr.io/${{ github.repository }}:erlang.mk
 ```
 
-
 ### Erlang/OTP with rebar3
-
 
 The following example is triggered by a [push
 event][github-workflow-push-event] to build an [Erlang/OTP Release with rebar3][rebar3].
 
-
 ```yaml
 ---
 on: [push]
-
+permissions:
+  packages: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -133,8 +141,6 @@ jobs:
           build-platforms: linux/amd64
           build-tags: ghcr.io/${{github.repository}}:rebar3
 ```
-
-
 
 ## Inputs
 
