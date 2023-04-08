@@ -204,6 +204,12 @@ dependent_so(#{build := #{prefix := Prefix},
            filename:join(
              [Prefix,
               Release,
+              "bin",
+              "*"]),
+
+           filename:join(
+             [Prefix,
+              Release,
               "lib/*/priv/lib/*"])]),
         lists:flatmap(
           fun
