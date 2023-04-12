@@ -42,6 +42,7 @@ LABEL org.opencontainers.image.source=${IMAGE_SOURCE}
 
 ENV BINDIR /erts/bin
 ENV LANG C.UTF-8
+ENV SHELL /bin/sh
 ENV TZ GMT
 
 # elixir - note that .config is not present on RELEASE_SYS_CONFIG

@@ -1,6 +1,6 @@
 #!/usr/bin/env escript
 %% -*- erlang -*-
-%% Copyright (c) 2012-2022 Peter Morgan <peter.james.morgan@gmail.com>
+%% Copyright (c) 2012-2023 Peter Morgan <peter.james.morgan@gmail.com>
 %%
 %% Licensed under the Apache License, Version 2.0 (the "License");
 %% you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 -mode(compile).
 
 
-main([])                          ->
+main([]) ->
     Build = configuration(build),
 
     ?FUNCTION_NAME(
@@ -35,8 +35,10 @@ main([])                          ->
            #{build => Build},
            [application, release, erts]));
 
-main(Configuration)               ->
+main(Configuration) ->
     output(Configuration),
+    %% erlang:open_port({spawn, ...}) requires /bin/sh
+    copy_bin(["/bin/sh"], Configuration),
     strip(Configuration),
     copy_dependent_so(Configuration),
     copy_ld_linux_so(Configuration),
@@ -44,10 +46,10 @@ main(Configuration)               ->
     link_release(Configuration).
 
 
-output(Configuration)             ->
+output(Configuration) ->
     ?FUNCTION_NAME(maps:iterator(Configuration), []).
 
-output(I0, Path)                  ->
+output(I0, Path) ->
     case maps:next(I0) of
         {Key, Value, I1} when is_map(Value) ->
             ?FUNCTION_NAME(maps:iterator(Value), [Key | Path]),
@@ -66,15 +68,15 @@ configuration(application, Build) ->
     {ok, [{application, Name, Properties}]} = file:consult(app(Build)),
     #{name => Name, properties => proplists:to_map(Properties)};
 
-configuration(release, Build)     ->
+configuration(release, Build) ->
     {release, {Name, Version}, _} = proplists:lookup(release, relx(Build)),
     #{name => Name, version => Version};
 
-configuration(erts, _Build)       ->
+configuration(erts, _Build) ->
     #{version => erlang:system_info(version)}.
 
 
-configuration(build)              ->
+configuration(build) ->
     case lists:foldl(
            fun
                (Filename, A) ->
@@ -100,7 +102,7 @@ configuration(build)              ->
     end.
 
 
-relx(#{name := erlang_mk})        ->
+relx(#{name := erlang_mk}) ->
     {ok, Relx} = file:consult("relx.config"),
     Relx;
 
@@ -119,13 +121,14 @@ relx(#{name := mix, prefix := Prefix}) ->
                         "*/releases/*")))),
     [{release, {Name, Version}, undefined}];
 
-relx(#{name := rebar})            ->
+
+relx(#{name := rebar}) ->
     {ok, RebarConfig} = file:consult("rebar.config"),
     {relx, Relx} = proplists:lookup(relx, RebarConfig),
     Relx.
 
 
-app(#{name := erlang_mk})         ->
+app(#{name := erlang_mk}) ->
     [Filename] = filelib:wildcard("ebin/*.app"),
     Filename;
 
@@ -137,9 +140,38 @@ app(#{name := mix}) ->
                                      "ebin/*.app"])),
     Filename;
 
-app(#{name := rebar})             ->
+app(#{name := rebar}) ->
     [Filename] = filelib:wildcard("src/*.app.src"),
     Filename.
+
+
+copy_bin(Binaries,
+         #{build := #{prefix := Prefix},
+           release := #{name := Release}}) ->
+    BinDir = filename:join([Prefix, Release, "bin"]),
+
+    lists:foreach(
+      fun
+          (Source) ->
+
+              {ok, SourceInfo} = file:read_link_info(Source),
+
+              Destination = filename:join(
+                              BinDir,
+                              filename:basename(Source)),
+
+              debug(Source ++ " -> " ++ Destination),
+
+              {ok, _} = file:copy(Source, Destination),
+
+              {ok, DestinationInfo} = file:read_link_info(Destination),
+
+              ok = file:write_file_info(
+                     Destination,
+                     DestinationInfo#file_info{mode = SourceInfo#file_info.mode})
+
+      end,
+      Binaries).
 
 
 strip(#{build := #{prefix := Prefix},
@@ -165,7 +197,7 @@ strip(#{build := #{prefix := Prefix},
                          "*"])))).
 
 
-copy_dependent_so(Configuration)  ->
+copy_dependent_so(Configuration) ->
     ?FUNCTION_NAME(Configuration, dependent_so(Configuration)).
 
 
@@ -183,7 +215,7 @@ copy_dependent_so(#{build := #{prefix := Prefix},
     debug(Source ++ ", copied."),
     ?FUNCTION_NAME(Configuration, Sources);
 
-copy_dependent_so(_, [])          ->
+copy_dependent_so(_, []) ->
     ok.
 
 
@@ -210,7 +242,8 @@ dependent_so(#{build := #{prefix := Prefix},
            filename:join(
              [Prefix,
               Release,
-              "lib/*/priv/lib/*"])]),
+              "lib/*/priv/**"])]),
+
         lists:flatmap(
           fun
               (SharedObject) ->
@@ -219,18 +252,30 @@ dependent_so(#{build := #{prefix := Prefix},
           filelib:wildcard("/lib/*/libnss*.so.*")))).
 
 
-ldd(Filename) ->
-    debug("ldd: " ++ Filename),
+ldd(Wildcard) ->
+    debug("ldd wildcard: " ++ Wildcard),
 
-    {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
-    {match, Matches} = re:run(
-                         os:cmd("/usr/bin/ldd " ++ Filename),
-                         MP,
-                         [global, {capture, all_but_first, list}]),
-    [Library || [Library] <- Matches].
+    lists:flatmap(
+      fun
+          (Filename) ->
+              {ok, MP} = re:compile("=> (.+) \\(", [multiline]),
+
+              case re:run(
+                     os:cmd("/usr/bin/ldd " ++ Filename),
+                     MP,
+                     [global, {capture, all_but_first, list}]) of
+
+                  {match, Matches} ->
+                      [Library || [Library] <- Matches];
+
+                  nomatch ->
+                      []
+              end
+      end,
+      filelib:wildcard(Wildcard)).
 
 
-copy_ld_linux_so(Configuration)   ->
+copy_ld_linux_so(Configuration) ->
     copy_dependent_so(Configuration, filelib:wildcard("/lib*/ld-linux*.so.*")).
 
 
