@@ -46,8 +46,11 @@ outputs:
     description: "Build result metadata"
     value: ${{steps.bpa.outputs.metadata}}
   tags:
-    description: "Image Tags"
+    description: "Docker Image Tags"
     value: ${{steps.dit.outputs.image_tags}}
+  image:
+    description: "Docker Image"
+    value: ${{steps.dit.outputs.image}}
 runs:
   using: composite
   steps:
@@ -93,7 +96,8 @@ runs:
     - name: use DOCKER_IMAGE_TAGS
       id: dit
       run: |
-        echo "image_tags=${{env.DOCKER_IMAGE_TAGS}}" >> $GITHUB_OUTPUT
+        echo "image_tags=${DOCKER_IMAGE_TAGS#*:}" >> $GITHUB_OUTPUT
+        echo "image=${DOCKER_IMAGE_TAGS%:*}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Build and push
       id: bpa
